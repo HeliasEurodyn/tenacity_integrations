@@ -1,0 +1,32 @@
+version: "3.5"
+services:
+  sofia-plugin:
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx512m
+    build:
+      context: sofia-plugin-container
+      args:
+        DB_IP: sofiadb
+        DB_PORT: 3306
+        DB_NAME: sofia
+        DB_USERNAME: root
+        DB_PASSWORD: hT7$Wn@P5*rL#mD9!
+        SOFIA_URI: http://sofia-backend:15502/api
+      dockerfile: Dockerfile
+    image: sofia-plugin
+    container_name: sofia-plugin
+    ports:
+      - "15555:15555"
+    restart: unless-stopped
+    networks:
+      - sofia_network 
+      - osint_proxy_osint_net
+networks:
+  sofia_network:
+    external: true
+    name: sofia_network
+    driver: bridge
+  osint_proxy_osint_net:
+    external: true
+    name: osint_proxy_osint_net
+    driver: bridge
