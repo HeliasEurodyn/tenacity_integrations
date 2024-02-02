@@ -73,4 +73,34 @@ public class BlockchainApiService {
         }
     }
 
+    public void syncPius() {
+
+//        List<Map<String, String>> pius = this.blockchainApiRestTemplate.getPius();
+//        for (Map<String, String> piu : pius) {
+//
+//            String id = piu.get("id");
+//            String name = piu.get("name");
+//            String adminEmail = piu.get("adminEmail");
+//
+//            String strQuery =
+//                    " INSERT INTO piu (uuid, name,  adminmail)  " +
+//                            " SELECT :uuid, :name, :adminmail " +
+//                            " WHERE (SELECT COUNT(uuid) FROM piu WHERE uuid = :uuid ) = 0 ";
+//
+//            Query spQuery = entityManager.createNativeQuery(strQuery);
+//
+//            spQuery.setParameter("uuid", id);
+//            spQuery.setParameter("name", name);
+//            spQuery.setParameter("adminmail", adminEmail);
+//
+//
+//            transactionTemplate.execute(transactionStatus -> {
+//                spQuery.executeUpdate();
+//                transactionStatus.flush();
+//                return null;
+//            });
+//
+//        }
+    }
+
 }

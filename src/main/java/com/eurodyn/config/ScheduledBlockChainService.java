@@ -4,6 +4,7 @@ import com.eurodyn.dto.sofia.LoginResponseDto;
 import com.eurodyn.resttemplates.sofia.SofiaRestTemplate;
 import com.eurodyn.service.blockchain_api.BlockchainApiService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -18,7 +19,7 @@ public class ScheduledBlockChainService {
     @Autowired
     BlockchainApiService blockchainApiService;
 
-    //    @Scheduled(cron = "0/30 * * * * *")
+    @Scheduled(cron = "0/30 * * * * *")
     public void myScheduledTask() {
 
         LoginResponseDto loginResponseDto = sofiaRestTemplate.login();
@@ -29,4 +30,11 @@ public class ScheduledBlockChainService {
         blockchainApiService.syncPnrs(headers);
 
     }
+
+
+    @Scheduled(cron = "0/30 * * * * *")
+    public void syncPius() {
+        blockchainApiService.syncPius();
+    }
+
 }

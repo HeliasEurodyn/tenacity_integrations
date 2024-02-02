@@ -62,4 +62,24 @@ public class BlockchainApiRestTemplate {
         return response.getBody();
     }
 
+    public List<Map<String, String>> getPius() {
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Content-Type", "application/json");
+        //  httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        HttpEntity httpEntity = new HttpEntity(httpHeaders);
+
+        ResponseEntity<List<Map<String, String>>> response =
+                restTemplate.exchange(
+                        URI.create(blockchainUri + "/PIU"),
+                        HttpMethod.GET,
+                        httpEntity,
+                        new ParameterizedTypeReference<List<Map<String, String>>>() {
+                        }
+                );
+
+        return response.getBody();
+
+    }
 }
