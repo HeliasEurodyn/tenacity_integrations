@@ -18,12 +18,6 @@ public class OsintController {
         this.osintService = osintService;
     }
 
-//    @PostMapping("/investigate")
-//    public InvestigationResponseDto investigate(@RequestBody InvestigateDto investigateDto,
-//                                                @RequestHeader("Authorization") String bearerToken) {
-//        return osintService.investigate(investigateDto, bearerToken);
-//    }
-
     @PostMapping("/investigate")
     public InvestigationResponseDto investigate(@RequestBody InvestigateDto investigateDto,
                                                 @RequestHeader("Authorization") String bearerToken) {

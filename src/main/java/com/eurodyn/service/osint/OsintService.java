@@ -3,6 +3,7 @@ package com.eurodyn.service.osint;
 import com.eurodyn.dto.osint.request.InvestigateDto;
 import com.eurodyn.dto.osint.response.InvestigationResponseDto;
 import com.eurodyn.dto.sofia.NotificationDTO;
+import com.eurodyn.dto.sofia.UserDTO;
 import com.eurodyn.repository.osint.OsintRepository;
 import com.eurodyn.resttemplates.osint.OsintRestTemplate;
 import com.eurodyn.resttemplates.sofia.SofiaRestTemplate;
@@ -27,35 +28,12 @@ public class OsintService {
     @Autowired
     OsintRepository osintRepository;
 
-//    public InvestigationResponseDto investigate(InvestigateDto investigateDto, String bearerToken) {
-//
-//        /*
-//         * Check If The token Is Valid
-//         * */
-//        this.sofiaRestTemplate.tokenValidationCheck(bearerToken);
-//
-//        /*
-//         * Request For Investigation By Osint
-//         * */
-//        InvestigationResponseDto investigateResponseDto = osintRestTemplate.investigate(investigateDto);
-//
-//        /*
-//         * Update Status of risk_assesment_result  to pending
-//         * */
-//        this.osintRepository.setRiskAssessmentResultPending(investigateDto, investigateResponseDto.getRequestId());
-//
-//        /*
-//         *
-//         * */
-//        return investigateResponseDto;
-//    }
-
     public InvestigationResponseDto investigate(InvestigateDto investigateDto, String bearerToken) {
 
         /*
          * Check If The token Is Valid
          * */
-        this.sofiaRestTemplate.tokenValidationCheck(bearerToken);
+        UserDTO userDTO = this.sofiaRestTemplate.getCurrentUser(bearerToken);
 
         /*
          * Get All The Data
@@ -70,7 +48,7 @@ public class OsintService {
         /*
          * Update Status of risk_assesment_result to pending
          * */
-        this.osintRepository.setRiskAssessmentResultPending(investigateDto, investigateResponseDto.getRequestId());
+        this.osintRepository.setRiskAssessmentResultPending(investigateDto, investigateResponseDto.getRequestId(), userDTO.getId());
 
         /*
          *
@@ -88,11 +66,8 @@ public class OsintService {
         InvestigationResponseDto investigateResultsDto = osintRestTemplate.requestInvestigationResults(investigationResponseDto);
         log.info(investigateResultsDto.toString());
 
-        if (investigateResultsDto.getDone() == null) {
-            return;
-        }
-
-        if (investigateResultsDto.getDone().equals("false")) {
+        if ((investigateResultsDto.getDone() == null ? "" : investigateResultsDto.getDone())
+                .equals("false")) {
             return;
         }
 
@@ -117,7 +92,7 @@ public class OsintService {
                         + "</b>.")
                 .icon("fa-square-poll-horizontal")
                 .receiverId(investigateDto.getRiskAssessmentOwnerId())
-                .command("{\"COMMAND-TYPE\":\"FORM\",\"LOCATE\":{\"ID\":\"2be5dd52-5d3a-4193-969d-e5638ba9a1b8\",\"SELECTION-ID\":\"" +
+                .command("{\"COMMAND-TYPE\":\"FORM\",\"LOCATE\":{\"ID\":\"ebd3e7d1-99fb-4a9f-8b48-0e55fc631a9e\",\"SELECTION-ID\":\"" +
                         investigateDto.getRisk_assesment_result_id()
                         + "\"}}")
                 .build();

@@ -51,13 +51,15 @@ public class OsintRepository {
         });
     }
 
-    public void setRiskAssessmentResultPending(InvestigateDto investigateDto, String requestId) {
+    public void setRiskAssessmentResultPending(InvestigateDto investigateDto, String requestId, String osintInvestigator) {
 
         String spQueryString =
                 " UPDATE risk_assesment_result " +
                         " SET " +
                         " osint_status = 'pending', " +
-                        " osint_requestid = :request_id " +
+                        " osint_requestid = :request_id , " +
+                        " osint_investigator = :osint_investigator , " +
+                        " osin_started_on = NOW() " +
                         " WHERE " +
                         " risk_assesment_result.id = :risk_assesment_result_id";
 
@@ -65,6 +67,8 @@ public class OsintRepository {
 
         spQuery.setParameter("request_id", requestId);
         spQuery.setParameter("risk_assesment_result_id", investigateDto.getRisk_assesment_result_id());
+        spQuery.setParameter("osint_investigator", osintInvestigator);
+
 
         transactionTemplate.execute(transactionStatus -> {
             spQuery.executeUpdate();
@@ -86,7 +90,7 @@ public class OsintRepository {
                         "ds.doca_country, " +
                         "ds.doca_city_name, " +
                         "ra.name, " +
-                        "ra.created_by " +
+                        "rar.osint_investigator " +
                         "FROM risk_assesment_result rar " +
                         "INNER JOIN passenger p ON p.id = rar.passenger_id " +
                         "INNER JOIN doc_ssr ds ON ds.passenger_id = p.id " +
@@ -124,7 +128,9 @@ public class OsintRepository {
 
     public List<InvestigateDto> getPendingRequests() {
         List<InvestigateDto> investigateDtos = new ArrayList<>();
-        Query query = this.entityManager.createNativeQuery("SELECT osint_requestid, id FROM risk_assesment_result WHERE osint_status = 'pending' ");
+        Query query = this.entityManager.createNativeQuery(
+                "SELECT osint_requestid, id " +
+                        "FROM risk_assesment_result WHERE osint_status = 'pending' ");
 
         List<Object[]> rows = query.getResultList();
 

@@ -3,6 +3,7 @@ package com.eurodyn.resttemplates.sofia;
 import com.eurodyn.dto.sofia.LoginDto;
 import com.eurodyn.dto.sofia.LoginResponseDto;
 import com.eurodyn.dto.sofia.NotificationDTO;
+import com.eurodyn.dto.sofia.UserDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -26,11 +27,11 @@ public class SofiaRestTemplate {
         this.restTemplate = restTemplate;
     }
 
-    public Object tokenValidationCheck(String token) {
+    public Object tokenValidationCheck(String bearerToken) {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/json");
-        httpHeaders.add("Authorization", token);
+        httpHeaders.add("Authorization", bearerToken);
 
         HttpEntity<LoginDto> httpEntity = new HttpEntity<>(httpHeaders);
 
@@ -46,13 +47,34 @@ public class SofiaRestTemplate {
         return response.getBody();
     }
 
+
+    public UserDTO getCurrentUser(String bearerToken) {
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Content-Type", "application/json");
+        httpHeaders.add("Authorization", bearerToken);
+        HttpEntity httpEntity = new HttpEntity(httpHeaders);
+
+        ResponseEntity<UserDTO> response = restTemplate.exchange(this.sofiaUri + "/user/current",
+                HttpMethod.GET,
+                httpEntity,
+                new ParameterizedTypeReference<UserDTO>() {
+                }
+        );
+
+        return response.getBody();
+
+//        return null;
+    }
+
+
     public LoginResponseDto login() {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/json");
         LoginDto loginDto = LoginDto.builder()
-                .username("testUser")
-                .password("123")
+                .username("osint_user")
+                .password("0s1n5_p@sw0rd")
                 .build();
 
         HttpEntity<LoginDto> httpEntity = new HttpEntity<>(loginDto, httpHeaders);
@@ -73,7 +95,7 @@ public class SofiaRestTemplate {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/json");
-        httpHeaders.add("Authorization", token);
+        httpHeaders.add("Authorization", "Bearer " + token);
 
         HttpEntity<NotificationDTO> httpEntity = new HttpEntity<>(notification, httpHeaders);
 
