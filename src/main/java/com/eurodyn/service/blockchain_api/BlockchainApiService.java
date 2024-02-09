@@ -1,5 +1,6 @@
 package com.eurodyn.service.blockchain_api;
 
+import com.eurodyn.dto.blockchain_api.PiuDTO;
 import com.eurodyn.dto.blockchain_api.RequestDTO;
 import com.eurodyn.resttemplates.blockchain_api.BlockchainApiRestTemplate;
 import com.eurodyn.resttemplates.sofia.SofiaBlockChainRestTemplate;
@@ -7,7 +8,11 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
 
@@ -18,9 +23,12 @@ public class BlockchainApiService {
 
     @Autowired
     BlockchainApiRestTemplate blockchainApiRestTemplate;
-
     @Autowired
     SofiaBlockChainRestTemplate sofiaBlockChainRestTemplate;
+    @Autowired
+    private EntityManager entityManager;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     public String postObjectData(RequestDTO requestDTO, Map<String, String> headers) {
         Map<String, Object> pnrRequestOutgoing = requestDTO.getRequest().get("pnr_request_outgoing");
@@ -73,8 +81,8 @@ public class BlockchainApiService {
         }
     }
 
-    public void syncPius() {
-
+    //    public void syncPius() {
+//
 //        List<Map<String, String>> pius = this.blockchainApiRestTemplate.getPius();
 //        for (Map<String, String> piu : pius) {
 //
@@ -101,6 +109,33 @@ public class BlockchainApiService {
 //            });
 //
 //        }
+//    }
+    @Transactional
+    public void syncPius() {
+        List<PiuDTO> pius = this.blockchainApiRestTemplate.getPius();
+        for (PiuDTO piu : pius) {
+            String id = piu.getId();
+            String name = piu.getName();
+            String adminEmail = piu.getAdminEmail();
+
+            String strQuery =
+                    "INSERT INTO piu (uuid, name, adminmail) " +
+                            "SELECT :uuid, :name, :adminmail " +
+                            "WHERE NOT EXISTS (SELECT 1 FROM piu WHERE uuid = :uuid)";
+
+            Query spQuery = entityManager.createNativeQuery(strQuery);
+
+            spQuery.setParameter("uuid", id);
+            spQuery.setParameter("name", name);
+            spQuery.setParameter("adminmail", adminEmail);
+
+            transactionTemplate.execute(transactionStatus -> {
+                spQuery.executeUpdate();
+                transactionStatus.flush();
+                return null;
+            });
+        }
     }
+
 
 }

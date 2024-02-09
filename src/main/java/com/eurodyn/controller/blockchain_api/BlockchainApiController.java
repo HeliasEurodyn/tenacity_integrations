@@ -24,5 +24,4 @@ public class BlockchainApiController {
                               @RequestHeader Map<String, String> headers) {
         blockchainApiService.postObjectData(requestDTO, headers);
     }
-
 }
