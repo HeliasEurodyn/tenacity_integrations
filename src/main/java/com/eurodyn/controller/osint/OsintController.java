@@ -11,9 +11,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/osint")
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.POST})
 public class OsintController {
-
     private final OsintService osintService;
-
+    
     public OsintController(OsintService osintService) {
         this.osintService = osintService;
     }

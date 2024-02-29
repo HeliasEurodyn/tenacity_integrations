@@ -106,8 +106,8 @@ public class OsintRepository {
             investigateDto.setRisk_assesment_result_id(riskΑssesmentResultΙd);
             investigateDto.setTimestamp(Instant.now());
             investigateDto.setCrimeTopic(Collections.singletonList("human-trafficking"));
-            investigateDto.setRiskAssessmentName(row[7].toString());
-            investigateDto.setRiskAssessmentOwnerId(row[8].toString());
+            investigateDto.setRiskAssessmentName(row[7] == null ? "" : row[7].toString());
+            investigateDto.setRiskAssessmentOwnerId(row[8] == null ? "" : row[8].toString());
 
             PersonDto person = new PersonDto();
             person.setFirstName(row[1].toString());

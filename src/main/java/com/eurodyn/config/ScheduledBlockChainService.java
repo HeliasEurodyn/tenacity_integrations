@@ -28,7 +28,8 @@ public class ScheduledBlockChainService {
         headers.put("authorization", "Bearer " + token);
 
         blockchainApiService.syncPnrs(headers);
-
+        blockchainApiService.syncAcknowledge(headers);
+        blockchainApiService.syncReject(headers);
     }
 
 

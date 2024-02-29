@@ -22,6 +22,12 @@ public class SofiaRestTemplate {
 
     @Value("${sofia.uri}")
     private String sofiaUri;
+    
+    @Value("${sofia.loggin.username}")
+    private String sofiaUsername;
+
+    @Value("${sofia.loggin.password}")
+    private String sofiaPassword;
 
     public SofiaRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -47,7 +53,6 @@ public class SofiaRestTemplate {
         return response.getBody();
     }
 
-
     public UserDTO getCurrentUser(String bearerToken) {
 
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -63,8 +68,6 @@ public class SofiaRestTemplate {
         );
 
         return response.getBody();
-
-//        return null;
     }
 
 
@@ -73,8 +76,8 @@ public class SofiaRestTemplate {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/json");
         LoginDto loginDto = LoginDto.builder()
-                .username("osint_user")
-                .password("0s1n5_p@sw0rd")
+                .username(sofiaUsername)
+                .password(sofiaPassword)
                 .build();
 
         HttpEntity<LoginDto> httpEntity = new HttpEntity<>(loginDto, httpHeaders);
