@@ -26,7 +26,7 @@ public class ScheduledBlockChainService {
         String token = loginResponseDto.getAccessToken();
         Map<String, String> headers = new HashMap<>();
         headers.put("authorization", "Bearer " + token);
-
+        
         blockchainApiService.syncPnrs(headers);
         blockchainApiService.syncAcknowledge(headers);
         blockchainApiService.syncReject(headers);

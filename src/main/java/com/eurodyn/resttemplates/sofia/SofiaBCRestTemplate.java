@@ -24,7 +24,7 @@ public class SofiaBCRestTemplate {
         this.restTemplate = restTemplate;
     }
 
-    public String postOutgoingRequest(Map<String, Map<String, Object>> parameters, Map<String, String> headers) {
+    public Map postOutgoingRequest(Map<String, Map<String, Object>> parameters, Map<String, String> headers) {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/json");
@@ -32,19 +32,19 @@ public class SofiaBCRestTemplate {
         HttpEntity<Map<String, Map<String, Object>>> httpEntity =
                 new HttpEntity<Map<String, Map<String, Object>>>(parameters, httpHeaders);
 
-        ResponseEntity<String> response =
+        ResponseEntity<Map> response =
                 restTemplate.exchange(
-                        URI.create(sofiaUri + "/dataset/pnr-outgoing-request"),
+                        URI.create(sofiaUri + "/dataset/v2/pnr-outgoing-request"),
                         HttpMethod.POST,
                         httpEntity,
-                        new ParameterizedTypeReference<String>() {
+                        new ParameterizedTypeReference<Map>() {
                         }
                 );
 
         return response.getBody();
     }
 
-    public String postIncomingRequest(Map<String, Map<String, Object>> parameters, Map<String, String> headers) {
+    public Map postIncomingRequest(Map<String, Map<String, Object>> parameters, Map<String, String> headers) {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/json");
@@ -52,12 +52,12 @@ public class SofiaBCRestTemplate {
         HttpEntity<Map<String, Map<String, Object>>> httpEntity =
                 new HttpEntity<Map<String, Map<String, Object>>>(parameters, httpHeaders);
 
-        ResponseEntity<String> response =
+        ResponseEntity<Map> response =
                 restTemplate.exchange(
-                        URI.create(sofiaUri + "/dataset/pnr-incoming-request"),
+                        URI.create(sofiaUri + "/dataset/v2/insert/pnr-incoming-request"),
                         HttpMethod.POST,
                         httpEntity,
-                        new ParameterizedTypeReference<String>() {
+                        new ParameterizedTypeReference<Map>() {
                         }
                 );
 
@@ -114,7 +114,7 @@ public class SofiaBCRestTemplate {
 
         ResponseEntity<Map<String, String>> response =
                 restTemplate.exchange(
-                        URI.create(sofiaUri + "/dataset/v2/passenger/"),
+                        URI.create(sofiaUri + "/dataset/v2/insert/passenger/"),
                         HttpMethod.POST,
                         httpEntity,
                         new ParameterizedTypeReference<Map<String, String>>() {
@@ -138,7 +138,7 @@ public class SofiaBCRestTemplate {
                 new HttpEntity(requestBody, httpHeaders);
 
         restTemplate.exchange(
-                URI.create(sofiaUri + "custom-query/data-objects/blockchain-update-request-id"),
+                URI.create(sofiaUri + "/custom-query/data-objects/blockchain-update-request-id"),
                 HttpMethod.POST,
                 httpEntity,
                 new ParameterizedTypeReference<Object>() {

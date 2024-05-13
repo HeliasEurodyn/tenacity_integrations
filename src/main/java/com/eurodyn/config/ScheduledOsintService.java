@@ -5,7 +5,6 @@ import com.eurodyn.dto.sofia.LoginResponseDto;
 import com.eurodyn.resttemplates.sofia.SofiaRestTemplate;
 import com.eurodyn.service.osint.OsintService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,7 +17,7 @@ public class ScheduledOsintService {
     @Autowired
     private OsintService osintService;
 
-    @Scheduled(cron = "0/30 * * * * *")
+    //    @Scheduled(cron = "0/30 * * * * *")
     public void myScheduledTask() {
         String token = "";
 

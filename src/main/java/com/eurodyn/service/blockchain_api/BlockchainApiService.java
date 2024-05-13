@@ -1,7 +1,7 @@
 package com.eurodyn.service.blockchain_api;
 
-import com.eurodyn.dto.blockchain_api.PiuDTO;
 import com.eurodyn.dto.blockchain_api.AcknowledgeDTO;
+import com.eurodyn.dto.blockchain_api.PiuDTO;
 import com.eurodyn.dto.blockchain_api.RequestDTO;
 import com.eurodyn.repository.blockchain_api.BlockChainRepository;
 import com.eurodyn.resttemplates.blockchain_api.BlockchainApiRestTemplate;
@@ -11,14 +11,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -40,43 +40,50 @@ public class BlockchainApiService {
     private TransactionTemplate transactionTemplate;
 
     public String createRequest(RequestDTO requestDTO, Map<String, String> headers) {
-        Map<String, Object> pnrRequestOutgoing = requestDTO.getRequest().get("pnr_request_outgoing");
+        log.debug("*** createRequest ***");
 
-        String reqId = (String) pnrRequestOutgoing.get("id");
-        if ((reqId == null ? "" : reqId).equals("")) {
-            return reqId;
+        Map<String, Object> pnrRequestOutgoing = requestDTO.getRequest().get("pnr_request_outgoing_obj");
+
+        pnrRequestOutgoing.put("blockchain_state", "Pending");
+
+        /*If pnrId already exists, return because it is already created */
+        String pnrId = (String) pnrRequestOutgoing.get("id");
+        if (!(pnrId == null ? "" : pnrId).equals("")) {
+            return pnrId;
         }
 
-        String pnrId = this.sofiaBCRestTemplate.postOutgoingRequest(requestDTO.getRequest(), headers);
-        pnrRequestOutgoing.put("id", pnrId);
+        /* Save To Sofia */
+        Map<String, String> requestData = this.sofiaBCRestTemplate.postOutgoingRequest(requestDTO.getRequest(), headers);
+        pnrRequestOutgoing.put("id", requestData.get("response"));
 
-        Map<String, Object> pnrRequestOutgoingSubEntities = (Map<String, Object>) pnrRequestOutgoing.get("sub-entities");
+        /* Find receiver id to send it there */
+        Map<String, Object> piuObj = (Map<String, Object>) pnrRequestOutgoing.get("piu_obj_obj");
+        String uuid = (String) piuObj.get("uuid");
 
-        Map<String, Object> piuObj = (Map<String, Object>) pnrRequestOutgoingSubEntities.get("piu_obj");
-
-        String uuid = (String) piuObj.get("id");
-
+        /* Save it to Blockchain */
         String blockChainRequestId = this.blockchainApiRestTemplate.request(requestDTO, uuid);
 
+        /* Save Blockchain request it to Sofia */
         this.sofiaBCRestTemplate.setRequestIdToPnr(pnrId, blockChainRequestId, headers);
 
+        /* Finally return pnrId to Sofia */
         return pnrId;
     }
 
     public void syncPnrs(Map<String, String> headers) {
+        log.debug("*** syncPnrs ***");
 
         List<Map<String, Object>> pnrs = this.blockchainApiRestTemplate.getPendingPnrs();
         for (Map<String, Object> pnr : pnrs) {
 
-            if (blockChainRepository.pnrAlreadyExists(pnr.get("requestId").toString())) {
+            if (blockChainRepository.pnrAlreadyExistsByRequestId(pnr.get("requestId").toString())) {
                 continue;
             }
 
             Map<String, Object> requestData = (Map<String, Object>) pnr.get("requestData");
             Map<String, Map<String, Object>> request = (Map<String, Map<String, Object>>) requestData.get("request");
 
-            Map<String, Object> pnrRequestOutgoing = request.get("pnr_request_outgoing");
-
+            Map<String, Object> pnrRequestOutgoing = request.get("pnr_request_outgoing_obj");
 
             pnrRequestOutgoing.put("blockchain_request_id", pnr.get("requestId"));
             pnrRequestOutgoing.put("blockchain_state", pnr.get("state"));
@@ -89,42 +96,13 @@ public class BlockchainApiService {
             pnrRequestOutgoing.put("rule_id", ruleId);
 
             this.sofiaBCRestTemplate.postIncomingRequest(request, headers);
-
         }
     }
 
-    //    public void syncPius() {
-//
-//        List<Map<String, String>> pius = this.blockchainApiRestTemplate.getPius();
-//        for (Map<String, String> piu : pius) {
-//
-//            String id = piu.get("id");
-//            String name = piu.get("name");
-//            String adminEmail = piu.get("adminEmail");
-//
-//            String strQuery =
-//                    " INSERT INTO piu (uuid, name,  adminmail)  " +
-//                            " SELECT :uuid, :name, :adminmail " +
-//                            " WHERE (SELECT COUNT(uuid) FROM piu WHERE uuid = :uuid ) = 0 ";
-//
-//            Query spQuery = entityManager.createNativeQuery(strQuery);
-//
-//            spQuery.setParameter("uuid", id);
-//            spQuery.setParameter("name", name);
-//            spQuery.setParameter("adminmail", adminEmail);
-//
-//
-//            transactionTemplate.execute(transactionStatus -> {
-//                spQuery.executeUpdate();
-//                transactionStatus.flush();
-//                return null;
-//            });
-//
-//        }
-//    }
-
     @Transactional
     public void syncPius() {
+        log.debug("*** syncPius ***");
+
         List<PiuDTO> pius = this.blockchainApiRestTemplate.getPius();
         for (PiuDTO piu : pius) {
             String id = piu.getId();
@@ -151,16 +129,14 @@ public class BlockchainApiService {
     }
 
     public void acknowledge(AcknowledgeDTO acknowledgeDTO, Map<String, String> headers) {
+        log.debug("*** acknowledge ***");
 
-        Map<String, Object> pnrRequestOutgoing = acknowledgeDTO.getRequest().get("pnr_request_outgoing");
-
-        Map<String, Object> pnrRequestOutgoingSubEntities = (Map<String, Object>) pnrRequestOutgoing.get("sub-entities");
-
-        Map<String, Object> riskΑssesmentResult = (Map<String, Object>) pnrRequestOutgoingSubEntities.get("risk_assesment_result");
+        Map<String, Object> pnrRequestOutgoing = acknowledgeDTO.getRequest().get("pnr_request_outgoing_obj");
+        List<Object> riskΑssesmentResultsArray = (List<Object>) pnrRequestOutgoing.get("risk_assesment_result_obj");
 
         List<Map<String, Object>> passengerDatasets = new ArrayList<>();
-        for (Map.Entry<String, Object> riskΑssesmentPair : riskΑssesmentResult.entrySet()) {
-            Map<String, Object> fields = (Map<String, Object>) riskΑssesmentPair.getValue();
+        for (Object riskΑssesmentResult : riskΑssesmentResultsArray) {
+            Map<String, Object> fields = (Map<String, Object>) riskΑssesmentResult;
             String passengerId = (String) fields.get("passenger_id");
             Map<String, Object> passengerDataset = this.sofiaBCRestTemplate.getPassenger(passengerId, headers);
             passengerDatasets.add(passengerDataset);
@@ -168,14 +144,17 @@ public class BlockchainApiService {
 
         acknowledgeDTO.setPassengerDatasets(passengerDatasets);
 
-        String uuid = (String) pnrRequestOutgoing.get("piu_id");
+        /* Find receiver id to send it there */
+        Map<String, Object> piuObj = (Map<String, Object>) pnrRequestOutgoing.get("piu_obj_obj");
+        String uuid = (String) piuObj.get("uuid");
+
         String requestId = (String) pnrRequestOutgoing.get("blockchain_request_id");
         this.blockchainApiRestTemplate.acknowledge(acknowledgeDTO, uuid, requestId);
         this.sofiaBCRestTemplate.postIncomingRequest(acknowledgeDTO.getRequest(), headers);
     }
 
-
     public void reject(Map<String, Map<String, Object>> request, Map<String, String> headers) {
+        log.debug("*** reject ***");
 
         Map<String, Object> pnrRequest = request.get("pnr_request_outgoing");
         String uuid = (String) pnrRequest.get("piu_id");
@@ -190,6 +169,7 @@ public class BlockchainApiService {
     }
 
     public void syncAcknowledge(Map<String, String> headers) {
+        log.debug("*** syncAcknowledge ***");
 
         List<Map<String, Object>> pnrs = this.blockchainApiRestTemplate.getAckPnrs();
         for (Map<String, Object> pnr : pnrs) {
@@ -198,23 +178,35 @@ public class BlockchainApiService {
 //            }
 
             Map<String, Object> responseData = (Map<String, Object>) pnr.get("responseData");
-
-            Map<String, Map<String, Object>> request = (Map<String, Map<String, Object>>) responseData.get("request");
             List<Map<String, Object>> passengerDatasets = (List<Map<String, Object>>) responseData.get("passengerDatasets");
 
-            /* Save Passenger Datasets */
-            for (Map<String, Object> passengerDataset : passengerDatasets) {
-                this.sofiaBCRestTemplate.setPassenger(passengerDataset, headers);
-            }
+            Map<String, Object> requestData = (Map<String, Object>) pnr.get("requestData");
+            Map<String, Map<String, Object>> request = (Map<String, Map<String, Object>>) requestData.get("request");
 
-            /* Save Pnr */
-            Map<String, Object> pnrRequestOutgoing = request.get("pnr_request_outgoing");
-            pnrRequestOutgoing.put("blockchain_request_id", pnr.get("requestId"));
+
+            Map<String, Object> pnrRequestOutgoing = request.get("pnr_request_outgoing_obj");
+            // pnrRequestOutgoing.put("blockchain_request_id", pnr.get("requestId"));
             pnrRequestOutgoing.put("blockchain_state", "Ack");
             pnrRequestOutgoing.put("request_type", "out");
             // pnrRequestOutgoing.put("id", pnr.get("requestId"));
             pnrRequestOutgoing.put("piu_id", pnr.get("respondingPIU"));
-            this.sofiaBCRestTemplate.postIncomingRequest(request, headers);
+
+            // Map<String, Object> piuObj = (Map<String, Object>) pnrRequestOutgoing.get("piu_obj_obj");
+
+            /* Save Passenger Datasets */
+            List<Object> riskAssesmentResults = new ArrayList<>();
+            for (Map<String, Object> passengerDataset : passengerDatasets) {
+                Map<String, String> passengerResponce =
+                        this.sofiaBCRestTemplate.setPassenger(passengerDataset, headers);
+                LinkedHashMap<String, String> resultObj = new LinkedHashMap<>();
+                resultObj.put("passenger_id", passengerResponce.get("response"));
+                riskAssesmentResults.add(resultObj);
+            }
+
+            pnrRequestOutgoing.put("risk_assesment_result_obj", riskAssesmentResults);
+
+            /* Save Pnr */
+            Object response = this.sofiaBCRestTemplate.postOutgoingRequest(request, headers);
 
             String respondingPIU = (String) pnr.get("respondingPIU");
             String requestId = (String) pnr.get("requestId");
@@ -224,6 +216,7 @@ public class BlockchainApiService {
     }
 
     public void syncReject(Map<String, String> headers) {
+        log.debug("*** syncReject ***");
 
         List<Map<String, Object>> pnrs = this.blockchainApiRestTemplate.getNackPnrs();
         for (Map<String, Object> pnr : pnrs) {

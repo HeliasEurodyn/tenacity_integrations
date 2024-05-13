@@ -1,7 +1,7 @@
 package com.eurodyn.resttemplates.blockchain_api;
 
-import com.eurodyn.dto.blockchain_api.PiuDTO;
 import com.eurodyn.dto.blockchain_api.AcknowledgeDTO;
+import com.eurodyn.dto.blockchain_api.PiuDTO;
 import com.eurodyn.dto.blockchain_api.RequestDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -179,7 +179,7 @@ public class BlockchainApiRestTemplate {
         return response.getBody();
     }
 
-    public String acknowledge(AcknowledgeDTO acknowledgeDTO, String uuid, String requestId) {
+    public Map acknowledge(AcknowledgeDTO acknowledgeDTO, String uuid, String requestId) {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/json");
@@ -200,7 +200,7 @@ public class BlockchainApiRestTemplate {
                         }
                 );
 
-        return response.getBody().get("requestId");
+        return response.getBody();
     }
 
     public String reject(String blockchainRejectionMessage, String uuid, String requestId) {

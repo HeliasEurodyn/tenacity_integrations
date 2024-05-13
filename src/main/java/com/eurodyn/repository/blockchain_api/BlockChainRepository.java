@@ -13,11 +13,13 @@ public class BlockChainRepository {
     @Autowired
     private EntityManager entityManager;
 
-    public Boolean pnrAlreadyExists(String id) {
+    public Boolean pnrAlreadyExistsByRequestId(String requestId) {
 
         Query query = this.entityManager.createNativeQuery(
-                "SELECT id, created_by FROM pnr_request_outgoing WHERE id = :id ");
-        query.setParameter("id", id);
+                " SELECT id, created_by FROM pnr_request_outgoing " +
+                        " WHERE blockchain_request_id = :request_id " +
+                        " AND request_type = 'in' ");
+        query.setParameter("request_id", requestId);
 
         List<Object[]> rows = query.getResultList();
 
