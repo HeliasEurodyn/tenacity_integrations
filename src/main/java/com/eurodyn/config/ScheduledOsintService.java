@@ -21,7 +21,6 @@ public class ScheduledOsintService {
     public void myScheduledTask() {
         String token = "";
 
-        // Your logic to be executed every 30 seconds
         List<InvestigateDto> investigateDtos = osintService.getPendingRequests();
 
 

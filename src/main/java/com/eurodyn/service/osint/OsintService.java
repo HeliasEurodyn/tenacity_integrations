@@ -35,10 +35,10 @@ public class OsintService {
          * */
         UserDTO userDTO = this.sofiaRestTemplate.getCurrentUser(bearerToken);
 
-        /*
-         * Get All The Data
-         * */
-        investigateDto = this.osintRepository.getInvestigationData(investigateDto.getRisk_assesment_result_id());
+//        /*
+//         * Get All The Data
+//         * */
+//        investigateDto = this.osintRepository.getInvestigationData(investigateDto.getRisk_assesment_result_id());
 
         /*
          * Request For Investigation By Osint

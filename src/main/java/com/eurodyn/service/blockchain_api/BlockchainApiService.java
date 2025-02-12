@@ -54,7 +54,8 @@ public class BlockchainApiService {
 
         /* Save To Sofia */
         Map<String, String> requestData = this.sofiaBCRestTemplate.postOutgoingRequest(requestDTO.getRequest(), headers);
-        pnrRequestOutgoing.put("id", requestData.get("response"));
+        pnrId = requestData.get("response");
+        pnrRequestOutgoing.put("id", pnrId);
 
         /* Find receiver id to send it there */
         Map<String, Object> piuObj = (Map<String, Object>) pnrRequestOutgoing.get("piu_obj_obj");
@@ -150,18 +151,23 @@ public class BlockchainApiService {
 
         String requestId = (String) pnrRequestOutgoing.get("blockchain_request_id");
         this.blockchainApiRestTemplate.acknowledge(acknowledgeDTO, uuid, requestId);
-        this.sofiaBCRestTemplate.postIncomingRequest(acknowledgeDTO.getRequest(), headers);
+
+        Map<String, Map<String, Object>> request = acknowledgeDTO.getRequest();
+        Map<String, Object> pnr_request_outgoing_obj = request.get("pnr_request_outgoing_obj");
+        pnr_request_outgoing_obj.put("blockchain_state","Acknowledged");
+        this.sofiaBCRestTemplate.postIncomingRequest(request, headers);
     }
 
     public void reject(Map<String, Map<String, Object>> request, Map<String, String> headers) {
         log.debug("*** reject ***");
 
-        Map<String, Object> pnrRequest = request.get("pnr_request_outgoing");
+        Map<String, Object> pnrRequest = request.get("pnr_request_outgoing_obj");
         String uuid = (String) pnrRequest.get("piu_id");
         String requestId = (String) pnrRequest.get("blockchain_request_id");
         String blockchainRejectionMessage = (String) pnrRequest.get("blockchain_rejection_message");
 
         pnrRequest.put("blockchain_rejected", 1);
+        pnrRequest.put("blockchain_state","Rejected");
 
         this.sofiaBCRestTemplate.postIncomingRequest(request, headers);
 

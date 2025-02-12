@@ -160,7 +160,7 @@ public class SofiaBCRestTemplate {
                 new HttpEntity(requestBody, httpHeaders);
 
         restTemplate.exchange(
-                URI.create(sofiaUri + "custom-query/data-objects/blockchain-update-rejection"),
+                URI.create(sofiaUri + "/custom-query/data-objects/blockchain-update-rejection"),
                 HttpMethod.POST,
                 httpEntity,
                 new ParameterizedTypeReference<Object>() {

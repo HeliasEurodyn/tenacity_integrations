@@ -203,7 +203,7 @@ public class BlockchainApiRestTemplate {
         return response.getBody();
     }
 
-    public String reject(String blockchainRejectionMessage, String uuid, String requestId) {
+    public void reject(String blockchainRejectionMessage, String uuid, String requestId) {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/json");
@@ -224,7 +224,7 @@ public class BlockchainApiRestTemplate {
                         }
                 );
 
-        return response.getBody().get("requestId");
+       // return response.getBody().get("requestId");
     }
 
 
