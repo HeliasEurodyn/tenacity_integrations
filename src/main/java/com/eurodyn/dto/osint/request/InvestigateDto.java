@@ -17,9 +17,9 @@ public class InvestigateDto {
     Instant timestamp;
     PersonDto person;
     List<String> crimeTopic;
-
+    InvestigateTravelAgencyDto travelAgency;
     String risk_assesment_result_id;
     String riskAssessmentName;
     String riskAssessmentOwnerId;
-
+    String userId;
 }

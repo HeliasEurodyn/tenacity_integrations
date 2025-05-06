@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.util.Map;
 
 @Service
 public class AnomalyDetectionRestTemplate {
@@ -27,12 +28,12 @@ public class AnomalyDetectionRestTemplate {
         this.restTemplate = restTemplate;
     }
 
-    public String anomalies(AnomalyDetectionDto anomalyDetectionDto) {
+    public String anomalies(Map<String, Object> request) {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/json");
 
-        HttpEntity<AnomalyDetectionDto> httpEntity = new HttpEntity<>(anomalyDetectionDto, httpHeaders);
+        HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(request, httpHeaders);
 
         ResponseEntity<String> response =
                 restTemplate.exchange(

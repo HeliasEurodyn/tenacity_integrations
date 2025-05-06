@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Slf4j
 @Service
 public class AnomalyDetectionService {
@@ -15,7 +17,7 @@ public class AnomalyDetectionService {
     @Autowired
     AnomalyDetectionRestTemplate anomalyDetectionRestTemplate;
 
-    public String anomalies(AnomalyDetectionDto anomalyDetectionDto) {
-        return anomalyDetectionRestTemplate.anomalies(anomalyDetectionDto);
+    public String anomalies(Map<String, Object> request) {
+        return anomalyDetectionRestTemplate.anomalies(request);
     }
 }

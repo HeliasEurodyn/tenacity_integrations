@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Slf4j
 @RestController
 @RequestMapping("/anomaly-detection")
@@ -19,8 +21,8 @@ public class AnomalyDetectionController {
     }
 
     @PostMapping(value ="/anomalies", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String anomalies(@RequestBody AnomalyDetectionDto anomalyDetectionDto) {
-        return anomalyDetectionService.anomalies(anomalyDetectionDto);
+    public String anomalies(@RequestBody Map<String, Object> request) {
+        return anomalyDetectionService.anomalies(request);
     }
 
 }

@@ -28,7 +28,7 @@ public class SofiaBCRestTemplate {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/json");
-        httpHeaders.add("Authorization", headers.get("authorization"));
+        httpHeaders.add("Authorization", headers.get("authorization"));     httpHeaders.add("Authorization", headers.get("authorization"));
         HttpEntity<Map<String, Map<String, Object>>> httpEntity =
                 new HttpEntity<Map<String, Map<String, Object>>>(parameters, httpHeaders);
 

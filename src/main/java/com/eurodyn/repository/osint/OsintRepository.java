@@ -129,8 +129,10 @@ public class OsintRepository {
     public List<InvestigateDto> getPendingRequests() {
         List<InvestigateDto> investigateDtos = new ArrayList<>();
         Query query = this.entityManager.createNativeQuery(
-                "SELECT osint_requestid, id " +
-                        "FROM risk_assesment_result WHERE osint_status = 'pending' ");
+                "SELECT r.osint_requestid, r.id, ra.created_by " +
+                        " FROM risk_assesment_result r " +
+                        " INNER JOIN risk_assesment ra ON r.risk_assesment_id = ra.id "+
+                        "  WHERE r.osint_status = 'pending' ");
 
         List<Object[]> rows = query.getResultList();
 
@@ -138,6 +140,7 @@ public class OsintRepository {
             InvestigateDto investigateDto = new InvestigateDto();
             investigateDto.setRequestId(row[0].toString());
             investigateDto.setRisk_assesment_result_id(row[1].toString());
+            investigateDto.setUserId(row[2].toString());
             investigateDtos.add(investigateDto);
         }
 

@@ -20,4 +20,5 @@ public class AnomalyDetectionDto {
     String anomalyTypes2;
     String bookingRef;
     String flightNumber;
+    Boolean descriptions;
 }

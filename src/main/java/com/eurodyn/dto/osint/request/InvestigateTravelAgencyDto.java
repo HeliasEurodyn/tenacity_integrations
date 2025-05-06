@@ -5,18 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.Instant;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class PersonDto {
-    String firstName;
-    String lastName;
-    String gender;
-    String birthDate;
-    AddressDto address;
-    List<String> email;
-    List<String> phoneNumber;
+public class InvestigateTravelAgencyDto {
+    String agencyId;
 }

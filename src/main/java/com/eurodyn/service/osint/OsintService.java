@@ -34,6 +34,7 @@ public class OsintService {
          * Check If The token Is Valid
          * */
         UserDTO userDTO = this.sofiaRestTemplate.getCurrentUser(bearerToken);
+        investigateDto.setUserId(userDTO.getId());
 
 //        /*
 //         * Get All The Data
